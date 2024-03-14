@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Confirmation</title>
+    <style>
+        body{
+            background-color: #fff;
+            font-family: sans-serif;
+            font-size: 16px;
+            margin: 0;
+            padding:0;
+        }
+        .container{
+            width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        h3{
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0
+        }
+        .btn{
+            background-color: #000088;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover{
+            background-color: #0000cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>You have sucessfully created your account</h3>
+        <p>Dear <%=firstName %>, Are you ready to take the challenge of the Cooking Master </p>
+        <p>Kindly click below to confirm your account </p>
+        <a href="<%=link %>" class="btn">Click here to confirm your email</a>
+        <p>If the above link is not working, you can clik the link below.</p>
+        <p><%= link %></p>
+    </div>
+</body>
+</html>

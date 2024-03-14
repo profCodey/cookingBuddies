@@ -1,10 +1,13 @@
 import UserModel from "../model/user.model.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+import { sendEmail } from "../services/emailServices.js";
+import ejs from "ejs";
+import path, { fileURLToPath, URL } from "url";
+import {dirname} from "path"
 
 export const registerUser = async (req, res) => {
   try {
-    console.log("req.body", req.body);
-
     const { email, userName, firstName, lastName, password, photo } = req.body;
 
     //Check if the user already exist in the database
@@ -31,37 +34,49 @@ export const registerUser = async (req, res) => {
       photo,
     });
 
+    //Hash the password
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(user.password, salt)
-      
-      console.log('this is user', user)
+   
+    const emailToken = jwt.sign(
+      {
+        user_email: user.email,
+        user_id: user._id,
+      },
+      process.env.EMAIL_SECRET,
+      {
+        expiresIn: "1hr",
+      }
+    );
 
-    //     .save((err, data) => {
-    //     if (err) {
-    //         return res.status(500).json({
-    //             message: `An error occurred while creating user. Please try again.`,
-    //             error: err,
-    //             status: "failed",
-    //             data: null
-    //         })
-    //     }
-    //     return res.status(201).json({
-    //         message: "User created successfully",
-    //         status: "success",
-    //         data: data
-    //     })
-    // });
+    user.emailToken = emailToken;
+    
+    const link = `${process.env.FRONT_END_URL}/verify-account/${emailToken}`;
+    
+    const __filename = fileURLToPath(new URL(import.meta.url));
+    const __dirname = dirname(__filename);
 
-    let name = "ozed";
+    const emailTemplatePath = path.resolve(__dirname, "../../src/utils/emailTemplates/verifyUser.ejs");
 
-    // return res.status(201).json(
-    //     {
-    //         message: "User created successfully",
-    //         status: "success",
-    //         data: req.body
+    const emailTemplate = ejs.renderFile(emailTemplatePath, {firstName: user.firstName, link})
 
-    //     }
-    // )
+    const mailSubject = "Welcome on Board";
+
+    try {
+      await sendEmail(user.email, mailSubject,emailTemplate )
+    } catch (error) {
+      console.error("Error sending email", error)
+    }
+
+    await user.save();
+
+        return res.status(201).json({
+            message: "User created successfully",
+            status: "success",
+            data: user,
+            email: user.emailToken
+        })
+  
   } catch (error) {
     console.log(error);
     return res.status(500).json({
