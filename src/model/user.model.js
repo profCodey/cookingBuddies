@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        userName: { 
+        userName: {
             type: String,
             required: true,
             unique: true,
@@ -52,15 +52,27 @@ const userSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-        // toJSON: {
-        //     transform: (doc, ret) => {
-        //         delete ret.password;
-        //         delete ret.__v;
-        //         return ret;
-        //     },
-        // },
+        toJSON: {
+            transform: (doc, ret) => {
+                delete ret.password;
+                delete ret.__v;
+                return ret;
+            },
+        },
     }
-)
+);
+
+userSchema.methods.generateAuthToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "7d",
+        }
+    );
+};
 
 
 export default mongoose.model("User", userSchema);
